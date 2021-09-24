@@ -54,3 +54,50 @@ $ python q5_pretrain.py --batch_size 128 --lr 0.001 --n_epoch 20 --dataset fashi
 |-|-|-|
 |MNIST|99.752%|99.08|
 |Fashion-MNIST|98.008%|91.04%|
+
+
+## Transfer learning
+We will finetune pretrained MNIST/Fashion-MNIST on a subset of EMNIST dataset.
+
+
+|pretraining dataset|target dataset|finetuned layers|file|
+|-|-|-|-|
+|None|EMNIST (reduced)|All|q5a.py
+|MNIST|EMNIST (reduced)|Last|q5b.py
+|MNIST|EMNIST (reduced)|All|q5c.py
+|Fashion-MNIST|EMNIST (reduced)|Last|q5d.py
+|Fashion-MNIST|EMNIST (reduced)|All|q5e.py
+
+
+### Hyperparameters
+- `n_epoch=10`
+- `batch_size=32`
+- `lr=0.001`
+
+### Figures
+
+#### No pretraining, finetune all layers
+**TODO**
+
+#### MNIST pretraining, finetune last layer
+![MNIST pretraining, finetune last layer](results/pretrain_MNIST_finetune_last_layer_n_epoch=10,bs=32,lr=0.001.png)
+
+#### MNIST pretraining, finetune all layers
+![MNIST pretraining, finetune all layers](results/pretrain_MNIST_finetune_all_layers_n_epoch=10,bs=32,lr=0.001.png)
+
+#### Fashion-MNIST pretraining, finetune last layer
+![Fashion-MNIST pretraining, finetune last layer](results/pretrain_Fashion-MNIST_finetune_last_layer_n_epoch=10,bs=32,lr=0.001.png)
+
+#### Fashion-MNIST pretraining, finetune all layers
+![Fashion-MNIST pretraining, finetune all layers](results/pretrain_Fashion-MNIST_finetune_all_layers_n_epoch=10,bs=32,lr=0.001.png)
+
+
+### Results
+
+|pretraining dataset|finetuned layers|train accuracy|test accuracy
+|-|-|-|-|
+|None|All|TODO|TODO|
+|MNIST|Last|62.62%|58.90%|
+|MNIST|All|97.42%|86.93%|
+|Fashion-MNIST|Last|43.94%|40.57%|
+|Fashion-MNIST|All|96.62%|83.25%|
