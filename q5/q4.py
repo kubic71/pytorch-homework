@@ -1,16 +1,15 @@
-# Fully connected feedforward net that fits MNIST perfectly
 import torch
 import torch.nn.functional as F
 from torch import nn
 from deeplib.history import History
 import poutyne
 import numpy as np
-import math
 
 from deeplib.datasets import load_mnist
 from deeplib.training import train
 from q5_helper import get_trainable_params
 
+# Fully connected feedforward net that fits MNIST perfectly
 class OverfitNet(nn.Module):
 
     def __init__(self, layer_sizes=[100, 100]):
@@ -33,63 +32,36 @@ class OverfitNet(nn.Module):
         for fc in self.fc_layers[:-1]:
             x = F.relu(fc(x))
         
-        x = F.relu(self.fc_layers[-1](x))
+        x = self.fc_layers[-1](x)
         return x
-
-#class DatasetSubset(t):
-#    def __init__(self, data, labels, n=100):
-#        self.n = n
-#        self.data = data
-#        self.labels = labels
-#
-#    def __len__(self):
-#        return self.n
-#
-#    def __getitem__(self, idx):
-#        self.data[idx], self.labels[idx]
-#
-#        img = Image.fromarray(img.numpy(), mode='L')
-#
-#        if self.transform is not None:
-#            img = self.transform(img)
-#
-#        if self.target_transform is not None:
-#            target = self.target_transform(target)
-
-
-from poutyne import one_cycle_phases
-from poutyne import OptimizerPolicy
 
 
 if __name__ == "__main__":
     torch.manual_seed(42)
     np.random.seed(42)
 
-    epochs = 600
-    batch_size = 4096
+    epochs = 30
 
-    # initial lr, max lr, final lr
-    lr_scale = 1
-    lr = tuple(map(lambda l: l*lr_scale,  (0.001, 0.01, 0.0003)))
+    # large batch sizes cause overfitting, which is exactly what we want
+    batch_size = 2048
 
-    # 80% of the MNIST is the train set
-    steps_per_epoch = math.ceil((60000 * 0.8) / batch_size)
-    # print("Steps per epoch:", steps_per_epoch)
+    # we have only 1 large hidden layer
+    hidden_sizes = [4096]
+
+    lr = 0.006
+
+    net = OverfitNet(layer_sizes=hidden_sizes)
+    print("OverfitNet:")
+    print(net)
+
+    print(f"Epochs: {epochs}")
+    print(f"batch_size: {batch_size}")
+    print(f"Learning rate: {lr}")
+
+    optimizer = torch.optim.Adam(get_trainable_params(net), lr=lr)
 
     train_ds, test_ds = load_mnist('data/')
-    net = OverfitNet(layer_sizes=[400])
-    net_params = get_trainable_params(net)
-    print(net)
-    # optimizer = torch.optim.Adam(get_trainable_params(net), lr=0.01)
-    optimizer = torch.optim.Adam(net_params, lr=lr[0])
-    policy = OptimizerPolicy(
-        one_cycle_phases(epochs * steps_per_epoch, lr=lr),
-    )
-
-    grad_clip = poutyne.ClipNorm(net_params, max_norm=5)
-
-    # policy = poutyne.StepLR(step_size=15, gamma=0.1) 
-    train(net, optimizer, dataset=train_ds, n_epoch=epochs, batch_size=batch_size, callbacks=[policy, grad_clip])
+    history = train(net, optimizer, dataset=train_ds, n_epoch=epochs, batch_size=batch_size)
 
 
     
