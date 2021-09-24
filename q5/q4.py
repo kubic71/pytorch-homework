@@ -2,7 +2,6 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from deeplib.history import History
-import poutyne
 import numpy as np
 
 from deeplib.datasets import load_mnist

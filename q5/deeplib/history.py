@@ -30,7 +30,7 @@ class History:
         for k, v in logs.items():
             self.history[k].append(v)
 
-    def display(self, display_lr=False):
+    def display(self, display_lr=False, show_fig=False):
         """
         Affiche deux graphiques pour les pertes en entraînement et en validation et pour l'exactitude (accuracy) en
         entraînement et en validation. De plus, si le taux d'apprentissage a été sauvegardé, il est possible de lui
@@ -65,7 +65,8 @@ class History:
             axes[1].set_xlabel('Epochs')
             axes[1].xaxis.set_major_locator(MaxNLocator(integer=True))
 
-        plt.show()
+        if show_fig:
+            plt.show()
 
     def display_loss(self):
         """
