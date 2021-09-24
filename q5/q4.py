@@ -9,6 +9,8 @@ from deeplib.datasets import load_mnist
 from deeplib.training import train
 from q5_helper import get_trainable_params
 
+import matplotlib.pyplot as plt
+
 # Fully connected feedforward net that fits MNIST perfectly
 class OverfitNet(nn.Module):
 
@@ -62,6 +64,12 @@ if __name__ == "__main__":
 
     train_ds, test_ds = load_mnist('data/')
     history = train(net, optimizer, dataset=train_ds, n_epoch=epochs, batch_size=batch_size)
+
+    # display the train/validation accuracy and loss
+    history.display()
+    plt.show()
+
+
 
 
     
