@@ -69,15 +69,3 @@ if __name__ == '__main__':
     pretrained_folder.mkdir(exist_ok=True)
     save_path = pretrained_folder.joinpath(f"{exp_name}.pth")
     torch.save(model.state_dict(), str(save_path))
-
-    # Modify the last layer of the network
-    # model.fc3 = nn.Linear(model.fc2.out_features, 10)
-
-    # Training
-    # TODO insert training code (you can use the train and test functions from deeplib)
-
-    # Saving model
-    # pretrained_folder = pathlib.Path('pretrained')
-    # pretrained_folder.mkdir(exist_ok=True)
-    # save_path = pretrained_folder.joinpath('state_name.pth')
-    # torch.save(model.state_dict(), str(save_path))
