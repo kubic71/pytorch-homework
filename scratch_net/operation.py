@@ -60,12 +60,14 @@ class SubOperation(Operation):
         super().__init__(left, right, name='-')
 
     def apply(self):
-        # TODO
-        pass
+        output_value = self.inputs[0].value - self.inputs[1].value
+        output_variable = super().apply(output_value.shape)
+        output_variable.value = output_value
+        return output_variable
 
     def derivate_inputs(self, gradient):
-        # TODO
-        pass
+        self.derivatives[self.inputs[0]] = gradient
+        self.derivatives[self.inputs[1]] = -gradient
 
 
 class MulOperation(Operation):
@@ -74,12 +76,24 @@ class MulOperation(Operation):
         super().__init__(left, right, name='*')
 
     def apply(self):
-        # TODO
-        pass
+        # element-wise multiplication of tensors
+        output_value = self.inputs[0].value*self.inputs[1].value
+        output_variable = super().apply(output_value.shape)  
+        output_variable.value = output_value
+        return output_variable
 
     def derivate_inputs(self, gradient):
-        # TODO
-        pass
+        # Loss L(z(x, y))
+        # z(x, y) = x*y
+        # dz/dx = y
+        # dz/dy = x
+
+        # input gradient = dL/dz
+        # output gradients = {dL/dx, dL/dy}
+        # dL/dx = dL/dz * dz/dx = dL/dz * y
+        # dL/dx = dL/dz * dz/dy = dL/dz * x
+        self.derivatives[self.inputs[0]] = gradient * self.inputs[1].value
+        self.derivatives[self.inputs[1]] = gradient * self.inputs[0].value
 
 
 class DivOperation(Operation):
@@ -88,14 +102,21 @@ class DivOperation(Operation):
         super().__init__(num, denum, name='/')
 
     def apply(self):
-        # TODO
-        pass
+        # element-wise division of tensors
+        output_value = self.inputs[0].value / self.inputs[1].value
+        output_variable = super().apply(output_value.shape)  
+        output_variable.value = output_value
+        return output_variable
+
 
     def derivate_inputs(self, gradient):
-        # TODO
-        pass
+        # z(x, y) = x / y
+        # dz/dx = 1/y
+        # dz/dy = -x / y^2
+        self.derivatives[self.inputs[0]] = gradient / self.inputs[1].value
+        self.derivatives[self.inputs[1]] = gradient * -self.inputs[0].value/(self.inputs[1].value**2)
 
-
+        
 class MatmulOperation(Operation):
     def __init__(self, left, right):
         left.value = self._to_2D_array(left.value)
@@ -111,29 +132,30 @@ class MatmulOperation(Operation):
             raise ValueError('Unsupported array shape')
 
     def apply(self):
-        # TODO
-        pass
+        output_value = np.matmul(self.inputs[0].value, self.inputs[1].value)
+        output_variable = super().apply(output_value.shape)  
+        output_variable.value = output_value
+        return output_variable
 
     def derivate_inputs(self, gradient):
         if len(gradient.shape) == 1:
             gradient = np.expand_dims(gradient, axis=0)  # SoftmaxLoss returns a 1D gradient
 
-        # TODO
-        pass
-
+        self.derivatives[self.inputs[0]] = np.matmul(gradient, self.inputs[1].transpose())
+        self.derivatives[self.inputs[1]] = np.matmul(gradient, self.inputs[0]).transpose()
 
 class ReluOperation(Operation):
     def __init__(self, input):
         super().__init__(input, name='relu')
 
     def apply(self):
-        # TODO
-        pass
+        output_value = np.maximum(self.inputs[0].value, 0)
+        output_variable = super().apply(output_value.shape)  
+        output_variable.value = output_value
+        return output_variable
 
     def derivate_inputs(self, gradient):
-        # TODO
-        pass
-
+        self.derivatives[self.inputs[0]] = self.gradient * (self.inputs[0] >= 0)
 
 class SoftmaxLossOperation(Operation):
     def __init__(self, input, label):
@@ -154,5 +176,13 @@ class SoftmaxLossOperation(Operation):
         return output_variable
 
     def derivate_inputs(self, _):
-        # TODO
-        pass
+        # z_i ... i-th softmax input
+        # p_i ... i-th softmax output (probability)
+        # y_i ... gold distribution
+        #   - in our case: y_i = 1 if i==gold_label else 0
+
+        y = np.zeros_like(self.softmax_output)
+        y[self.label] = 1
+
+        # dL/dz_i = p_i - y_i
+        self.derivatives[self.inputs[0]] = self.softmax_output - y
