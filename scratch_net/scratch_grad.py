@@ -28,8 +28,21 @@ class Variable:
         self.consumer_operations.append(c)
 
     def _build_gradient(self):  # Inspired by algorithm 6.6 (p.210) of the Deep Learning book
-        # TODO
-        pass
+        if self.gradient is not None:
+            return
+
+        self.gradient = np.zeros_like(self._value)
+
+        # compute gradient for all children
+        for c_op in self.consumer_operations:
+            c_op.output._build_gradient()
+
+            # compute the gradient of consumer operation with respect to its inputs
+            c_op.derivate_inputs(c_op.output.gradient)
+
+            # add the gradient flowing from the consumer
+            self.gradient += c_op.derivatives[self]
+
 
     def _build_gradient_all_parents(self, computed_vars_set):
         if self.operation is not None:

@@ -141,8 +141,8 @@ class MatmulOperation(Operation):
         if len(gradient.shape) == 1:
             gradient = np.expand_dims(gradient, axis=0)  # SoftmaxLoss returns a 1D gradient
 
-        self.derivatives[self.inputs[0]] = np.matmul(gradient, self.inputs[1].transpose())
-        self.derivatives[self.inputs[1]] = np.matmul(gradient, self.inputs[0]).transpose()
+        self.derivatives[self.inputs[0]] = np.matmul(gradient, self.inputs[1].value.transpose())
+        self.derivatives[self.inputs[1]] = np.matmul(self.inputs[0].value.transpose(), gradient)
 
 class ReluOperation(Operation):
     def __init__(self, input):
@@ -155,7 +155,7 @@ class ReluOperation(Operation):
         return output_variable
 
     def derivate_inputs(self, gradient):
-        self.derivatives[self.inputs[0]] = self.gradient * (self.inputs[0] >= 0)
+        self.derivatives[self.inputs[0]] = gradient * (self.inputs[0].value >= 0)
 
 class SoftmaxLossOperation(Operation):
     def __init__(self, input, label):
