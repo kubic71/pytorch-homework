@@ -24,3 +24,9 @@ $ python q4.py
 - `validation_loss: 0.071842`
 - `validation_acc: 98.183334`
 
+## Does it overfit?
+Training useful neural network models means making them pick out and learn useful general patterns that can be reapplied.
+
+Overfitting is can be thought of as fitting the training data too well along with the noise, essentially memorizing and including the randomness in the trained model. Memorization doesn't help the generalization though, where by "generalization" we mean the performance on unseen data. The validation/test data will most likely contain differrent random noise to that of the noise present in the training dataset.
+
+In our little experiment we saw, that at some point in the training process the validation accuracy stopped getting better while the training accuracy was still rising, all the way up to 100%. At some point the neural network stopped learning general patterns and only concentrated on memorizing every training example in the dataset.
